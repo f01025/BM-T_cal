@@ -1,7 +1,8 @@
 name: Build Android APK
 on:
+  workflow_dispatch:      # <--- This creates the "Run" button
   push:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   build:
@@ -10,32 +11,32 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Setup Python environment
+      # 1. Setup Python
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: '3.10'
 
-      # Install Buildozer and dependencies
+      # 2. Install Buildozer
       - name: Install dependencies
         run: |
           pip install --upgrade pip
           pip install buildozer cython==0.29.33
 
-      # Install System libraries (The stuff your PC was failing on)
-      - name: Install System Deps
+      # 3. Install System Libraries
+      - name: Install Linux Libs
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libffi-dev libssl-dev python3-dev \
           libltdl-dev autoconf automake libtool pkg-config cmake \
           zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 openjdk-17-jdk unzip zip
 
-      # Build the APK
+      # 4. Build the APK
       - name: Build with Buildozer
         run: |
           yes | buildozer android debug
 
-      # Upload the APK so you can download it
+      # 5. Upload the APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
