@@ -1,0 +1,43 @@
+name: Build Android APK
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Setup Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+
+      # Install Buildozer and dependencies
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install buildozer cython==0.29.33
+
+      # Install System libraries (The stuff your PC was failing on)
+      - name: Install System Deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libffi-dev libssl-dev python3-dev \
+          libltdl-dev autoconf automake libtool pkg-config cmake \
+          zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 openjdk-17-jdk unzip zip
+
+      # Build the APK
+      - name: Build with Buildozer
+        run: |
+          yes | buildozer android debug
+
+      # Upload the APK so you can download it
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-apk
+          path: bin/*.apk
